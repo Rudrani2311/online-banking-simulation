@@ -1,11 +1,15 @@
 package com.bankingsim.service;
 
 import com.bankingsim.dto.CustomerRequest;
+import com.bankingsim.entity.Account;
 import com.bankingsim.entity.Customer;
+import com.bankingsim.entity.Transaction;
 import com.bankingsim.exception.ResourceNotFoundException;
 import com.bankingsim.repository.CustomerRepository;
+import com.bankingsim.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,16 +17,15 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final TransactionRepository transactionRepository;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, TransactionRepository transactionRepository) {
         this.customerRepository = customerRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public Customer createCustomer(CustomerRequest request) {
-        customerRepository.findByEmail(request.getEmail()).ifPresent(existing -> {
-            throw new IllegalArgumentException("Customer with email " + request.getEmail() + " already exists");
-        });
         Customer customer = new Customer(request.getName(), request.getEmail(), request.getPhone(), request.getAddress());
         return customerRepository.save(customer);
     }
@@ -38,11 +41,6 @@ public class CustomerService {
 
     public Customer updateCustomer(Long id, CustomerRequest request) {
         Customer customer = getCustomerById(id);
-        customerRepository.findByEmail(request.getEmail())
-                .filter(existing -> !existing.getId().equals(id))
-                .ifPresent(existing -> {
-                    throw new IllegalArgumentException("Customer with email " + request.getEmail() + " already exists");
-                });
         customer.setName(request.getName());
         customer.setEmail(request.getEmail());
         customer.setPhone(request.getPhone());
@@ -50,8 +48,14 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
+    @Transactional
     public void deleteCustomer(Long id) {
         Customer customer = getCustomerById(id);
+        for (Account account : customer.getAccounts()) {
+            List<Transaction> txs = transactionRepository
+                    .findBySourceAccount_IdOrTargetAccount_IdOrderByTimestampDesc(account.getId(), account.getId());
+            transactionRepository.deleteAll(txs);
+        }
         customerRepository.delete(customer);
     }
 }

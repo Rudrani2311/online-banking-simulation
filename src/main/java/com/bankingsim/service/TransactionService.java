@@ -28,9 +28,6 @@ public class TransactionService {
     @Transactional
     public Transaction deposit(Long accountId, BigDecimal amount) {
         Account account = accountService.getAccountById(accountId);
-        if (!account.isActive()) {
-            throw new IllegalStateException("Cannot deposit into inactive account " + account.getAccountNumber());
-        }
         account.setBalance(account.getBalance().add(amount));
         accountService.save(account);
 
@@ -45,9 +42,6 @@ public class TransactionService {
     @Transactional
     public Transaction withdraw(Long accountId, BigDecimal amount) {
         Account account = accountService.getAccountById(accountId);
-        if (!account.isActive()) {
-            throw new IllegalStateException("Cannot withdraw from inactive account " + account.getAccountNumber());
-        }
 
         if (account.getBalance().compareTo(amount) < 0) {
             throw new InsufficientBalanceException(
@@ -68,17 +62,8 @@ public class TransactionService {
 
     @Transactional
     public Transaction transfer(TransferRequest request) {
-        if (request.getSourceAccountId().equals(request.getTargetAccountId())) {
-            throw new IllegalArgumentException("Source and target accounts must be different");
-        }
         Account source = accountService.getAccountById(request.getSourceAccountId());
         Account target = accountService.getAccountById(request.getTargetAccountId());
-        if (!source.isActive()) {
-            throw new IllegalStateException("Source account " + source.getAccountNumber() + " is inactive");
-        }
-        if (!target.isActive()) {
-            throw new IllegalStateException("Target account " + target.getAccountNumber() + " is inactive");
-        }
         BigDecimal amount = request.getAmount();
 
         if (source.getBalance().compareTo(amount) < 0) {
@@ -104,7 +89,6 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public List<Transaction> getTransactionHistory(Long accountId) {
-        accountService.getAccountById(accountId);
         return transactionRepository.findBySourceAccount_IdOrTargetAccount_IdOrderByTimestampDesc(accountId, accountId);
     }
 }
