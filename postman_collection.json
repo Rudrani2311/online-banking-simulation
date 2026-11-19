@@ -1,0 +1,61 @@
+{
+  "info": {
+    "name": "Online Banking Simulation API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Customer",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Kaustubh Tripathi\",\n  \"email\": \"kaustubh@example.com\",\n  \"phone\": \"9876543210\",\n  \"address\": \"Chandigarh, India\"\n}" },
+        "url": { "raw": "http://localhost:8080/api/customers", "host": ["localhost"], "port": "8080", "path": ["api", "customers"] }
+      }
+    },
+    {
+      "name": "Open Account",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"customerId\": 1,\n  \"accountType\": \"SAVINGS\",\n  \"initialBalance\": 10000.00\n}" },
+        "url": { "raw": "http://localhost:8080/api/accounts", "host": ["localhost"], "port": "8080", "path": ["api", "accounts"] }
+      }
+    },
+    {
+      "name": "Deposit",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"amount\": 5000.00\n}" },
+        "url": { "raw": "http://localhost:8080/api/accounts/1/deposit", "host": ["localhost"], "port": "8080", "path": ["api", "accounts", "1", "deposit"] }
+      }
+    },
+    {
+      "name": "Withdraw",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"amount\": 2000.00\n}" },
+        "url": { "raw": "http://localhost:8080/api/accounts/1/withdraw", "host": ["localhost"], "port": "8080", "path": ["api", "accounts", "1", "withdraw"] }
+      }
+    },
+    {
+      "name": "Transfer Funds",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"sourceAccountId\": 1,\n  \"targetAccountId\": 2,\n  \"amount\": 1500.00\n}" },
+        "url": { "raw": "http://localhost:8080/api/transactions/transfer", "host": ["localhost"], "port": "8080", "path": ["api", "transactions", "transfer"] }
+      }
+    },
+    {
+      "name": "Transaction History",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "http://localhost:8080/api/accounts/1/transactions", "host": ["localhost"], "port": "8080", "path": ["api", "accounts", "1", "transactions"] }
+      }
+    }
+  ]
+}
